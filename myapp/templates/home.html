@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js" integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>home page</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}"/>
+    <style>
+		
+		.pagination { display: inline-block;}
+		.pagination a { color: black; float: left; padding: 8px 16px; text-decoration: none;}
+		.pagination a.active { background-color: #4CAF50; color: white;}
+		.pagination a:hover:not(.active) {background-color: #ddd;}
+
+
+        .listPage {
+            padding:  10px;
+            text-align:  center;
+            list-style: none;
+
+        }
+
+        .listPage li{
+            background-color: #ffffffBD;
+            padding: 10px;
+            display: inline-block;
+            margin:  0 10px;
+            cursor: pointer;
+
+        }
+
+        .listPage .active{
+            background-color: blue;
+            color: white;
+        }
+       
+		</style>
+</head>
+<body>
+    <div class="main">
+        <div class="loading" style="display: none;">
+            loading...
+        </div>
+        <div class="search-div">
+        
+            <input type="text" name="search" id="search" placeholder="search query">
+            <button id="btn" type="button">Search</button>
+        
+        <!-- End of search-form div -->
+        </div>
+        <div class="error" style="display: none;">
+            Error message here!
+            
+            <!-- End of error div -->
+        </div>
+      
+        <div class="table-div">
+            <table border="1">
+                <thead>
+                    <th>ID</th>
+                    <th>Log Name</th>
+                    <th>Log Massage</th>
+                    <th>Ip Address</th>
+                    <th>Time</th>
+                </thead>
+                <tbody>
+                    {% for log in page_obj %}
+                    <tr>
+                        <td>{{log.id}}</td>
+                        <td>{{log.name}}</td>
+                        <td>{{log.massage}}</td>
+                        <td>{{log.ip_address}}</td>
+                        <td>{{log.time}}</td>
+
+                        {% endfor %}
+                    </tr>
+                </tbody>
+               
+            </table> 
+            
+            <ul class="listPage">
+
+            </ul>
+          
+
+            <!-- End of table div -->
+        </div>
+
+       
+
+    
+        <!-- End of main div -->
+
+       
+    </div>
+
+<script>
+        let page = 1;
+        let per_page = 10;
+        let searchTerm = $('#search').val();
+        let data = [];
+    // load data when page is loaded. this will load all data from table. and paginates.
+    $(document).ready(function(){
+        $('.loading').show();
+        $.ajax({
+            type: "GET",
+            url: "{% url 'getlogs' %}",
+            success: function(response){
+                $('.loading').hide();
+                data = response.logs;
+                console.log(response.logs)
+                loadData(data); 
+            },
+            error: function(response){
+                console.log("error accoured", response)
+            }
+        });
+    })
+    
+
+    $('#btn').click(function(){
+        disableBtn();
+        
+        $('.loading').show();
+        $.ajax({
+            type: "GET",
+            url: "{%url 'search'%}",
+            data: {
+                search:$('#search').val()
+            },
+            success: function(response){
+                $('.loading').hide();
+                data = response.logs;
+                loadData(data); 
+                // $('#search').val('')
+                enableBtn();
+            },
+            error: function(response){
+                console.log("error accoured", response)
+                enableBtn()
+            }
+        });
+
+    });
+
+    function loadData(data){
+        let start = per_page * (page - 1);
+        let end = per_page * page -1;
+        $('tbody').empty();
+        let temp = "";
+        data.forEach((item, key)=>{
+                    if(key >= start && key <= end){
+                        temp = `
+                        <tr>
+                            <td> ${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${item.massage}</td>
+                            <td>${item.ip_address}</td>
+                            <td> ${item.time}</td>
+                           
+                        </tr>
+                        `;
+                        $('tbody').append(temp);
+                        console.log(item.id)
+
+                    }
+                });
+
+                paginate();
+    }
+  
+    function paginate(){
+            
+            let total_pages = Math.ceil(data.length / per_page);
+            let page_item = document.querySelector('.listPage');
+            page_item.innerHTML = "";
+
+            if(page != 1){
+
+                // first page button
+                let first = document.createElement('li');
+                first.innerText = "first";
+                first.setAttribute('onclick',"changePage("+1+")");
+                page_item.appendChild(first);
+
+                // previous button
+                let prev = document.createElement('li');
+                prev.innerText = "prev";
+                prev.setAttribute('onclick',"changePage("+(page - 1)+")");
+                page_item.appendChild(prev);
+
+            }
+            for(i = 1; i <= total_pages; i++){
+                let li = document.createElement('li');
+                li.innerText = i;
+
+                if(i == page){
+                li.classList.add('active');
+               
+                 }
+                li.setAttribute('onclick', "changePage("+i+")");
+                if(i <= 3){
+                    page_item.appendChild(li);
+                }
+                
+            }
+
+            if(page != total_pages){
+
+                // next page button
+                let next = document.createElement('li');
+                next.innerText = "next";
+                next.setAttribute('onclick',"changePage("+(page + 1)+")");
+                page_item.appendChild(next);
+                
+                // last page buuton
+                let last = document.createElement('li');
+                last.innerText = "last";
+                last.setAttribute('onclick',"changePage("+total_pages+")");
+                page_item.appendChild(last);
+
+            }
+
+            
+                let current = document.createElement('li');
+                current.innerText = `${page} of ${total_pages} pages` ;
+                page_item.appendChild(current);
+            
+            
+        }
+
+    function changePage(i){
+        page = i;
+        loadData(data);
+        console.log(page);
+        
+    }
+        
+    function disableBtn(){
+                btn.innerHTML = "searching..";
+                btn.disabled = true;
+                $('#btn').css('background-color','gray')
+            }
+    function enableBtn(){
+        btn.innerHTML = "search";
+        btn.disabled = false;
+        $('#btn').css('background-color','black')
+     }     
+     
+
+</script>   
+</body>
+</html>
