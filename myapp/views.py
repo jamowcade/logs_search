@@ -12,19 +12,12 @@ def index(request):
 def getData(request):
     logs = mylogs.objects.all()
     print(logs)
-
     return JsonResponse({"logs":list(logs.values())})
 
 def search(request):
-    logs = ""
-    context = {
-        "logs":logs
-    }
     q = request.GET.get('search')
-    print(q)
     vector = SearchVector('name','massage','time', 'ip_address')
-    query = SearchQuery(q, search_type="raw")
-        # search_headline = SearchHeadline('description', query) 
+    query = SearchQuery(q, search_type="raw") 
     logs = mylogs.objects.annotate(search=vector).filter(search=query)
     return JsonResponse({"logs":list(logs.values())})
   
