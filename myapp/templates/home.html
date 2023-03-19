@@ -113,14 +113,17 @@
                 data = response.logs;
                 console.log(response.logs)
                 loadData(data); 
+                highLight();
             },
             error: function(response){
                 console.log("error accoured", response)
             }
         });
-    })
-    
 
+        
+    });
+    
+    // search button
     $('#btn').click(function(){
         disableBtn();
         
@@ -139,6 +142,7 @@
                 enableBtn();
             },
             error: function(response){
+                $('.loading').hide();
                 console.log("error accoured", response)
                 enableBtn()
             }
@@ -157,21 +161,21 @@
                         <tr>
                             <td> ${item.id}</td>
                             <td>${item.name}</td>
-                            <td>${item.massage}</td>
+                            <td><span style="background-color: blue">${searchTerm}</span>${item.massage}</td>
                             <td>${item.ip_address}</td>
                             <td> ${item.time}</td>
                            
                         </tr>
                         `;
                         $('tbody').append(temp);
-                        console.log(item.id)
-
+                        
                     }
                 });
 
                 paginate();
     }
   
+    // pagination functioni
     function paginate(){
             
             let total_pages = Math.ceil(data.length / per_page);
@@ -235,7 +239,6 @@
     function changePage(i){
         page = i;
         loadData(data);
-        console.log(page);
         
     }
         
@@ -249,7 +252,18 @@
         btn.disabled = false;
         $('#btn').css('background-color','black')
      }     
-     
+     function highLight(){
+        let list = document.querySelectorAll('tbody tr td')
+        let term = "SSH"
+        list.forEach((item, key)=>{
+            
+            if (term in $(item).text){
+                console.log($(item).text())
+            }
+            
+        })
+        
+     }
 
 </script>   
 </body>
