@@ -67,7 +67,7 @@
                     <th>Time</th>
                 </thead>
                 <tbody>
-                    {% for log in page_obj %}
+                    {% for log in logs %}
                     <tr>
                         <td>{{log.id}}</td>
                         <td>{{log.name}}</td>
@@ -81,6 +81,8 @@
                
             </table> 
             
+        
+
             <ul class="listPage">
 
             </ul>
@@ -103,25 +105,25 @@
         let searchTerm = $('#search').val();
         let data = [];
     // load data when page is loaded. this will load all data from table. and paginates.
-    $(document).ready(function(){
-        $('.loading').show();
-        $.ajax({
-            type: "GET",
-            url: "{% url 'getlogs' %}",
-            success: function(response){
-                $('.loading').hide();
-                data = response.logs;
-                console.log(response.logs)
-                loadData(data); 
-                highLight();
-            },
-            error: function(response){
-                console.log("error accoured", response)
-            }
-        });
+    // $(document).ready(function(){
+    //     $('.loading').show();
+    //     $.ajax({
+    //         type: "GET",
+    //         url: "{% url 'getlogs' %}",
+    //         success: function(response){
+    //             $('.loading').hide();
+    //             data = response.logs;
+    //             console.log(response.logs)
+    //             loadData(data); 
+    //             highLight();
+    //         },
+    //         error: function(response){
+    //             console.log("error accoured", response)
+    //         }
+    //     });
 
         
-    });
+    // });
     
     // search button
     $('#btn').click(function(){
@@ -161,7 +163,7 @@
                         <tr>
                             <td> ${item.id}</td>
                             <td>${item.name}</td>
-                            <td><span style="background-color: blue">${searchTerm}</span>${item.massage}</td>
+                            <td>${item.massage}</td>
                             <td>${item.ip_address}</td>
                             <td> ${item.time}</td>
                            
