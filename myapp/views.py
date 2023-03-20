@@ -11,12 +11,14 @@ def index(request):
     paginator = Paginator(logs, 10)
     if request.method == "GET":
         page = request.GET.get('page')
-    page = 2
-    page_obj = paginator.page(page)
+    page_obj = paginator.get_page(page)
 
+    page_range = paginator.page_range
+    print(page_range)
     
     context = {
-        "logs":page_obj
+        "logs":page_obj,
+        "page_range":page_range
     }
     return render(request, 'home.html', context)
 
